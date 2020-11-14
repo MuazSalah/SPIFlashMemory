@@ -12,11 +12,11 @@ I have modified the code so that I can send a simple string and readback a simpl
 
 
 ## Description
-* SPIFlash Library + Example Codes (Standard Arduino Library format)
+SPIFlash Library + Example Codes (Standard Arduino Library format)
 
-* It provides functions which takes/returns Strings and takes care of bytes conversions internally.
+It provides functions which takes/returns Strings and takes care of bytes conversions internally.
 
-* It uses the EEPORM to store a pointer so that it will always write in the next available slot in the memory
+It uses the EEPORM to store a pointer so that it will always write in the next available slot in the memory
 
 
 ## Functions
@@ -29,6 +29,10 @@ Writes a string to the flash memory starting at the next avaialble slot (byte);
 
 * ```myflash.readFromFlash();```
 Reads all the content of the flash and return it in the form of a string
+
+
+## Compatibility
+The library have been tested with Winbond W25Q128JV (using Sparkfun's Serial Flash Breakout - Assembled 128Mbit [SPX-17115]), however, it should be able to work with the other varities of SPI flash memories.
 
 
 Provided as is, no warranty given
