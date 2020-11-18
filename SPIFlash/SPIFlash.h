@@ -63,8 +63,8 @@
 //#define FLASH_ADDRESS_POINTER_PAGE 11 //Address 11 and 12 will be used as we need an int for the page number (for a 128MBit Flash, there are 4096 pages)
 
 //The weirdo constructo
-#ifndef SPIFlash
-#define SPIFlash
+#ifndef SPI_Flash
+#define SPI_Flash
 
 
 
