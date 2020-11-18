@@ -14,21 +14,28 @@ I have modified the code so that I can send a simple string and readback a simpl
 ## Description
 SPIFlash Library + Example Codes (Standard Arduino Library format)
 
-It provides functions which takes/returns Strings and takes care of bytes conversions internally.
+It provides functions which takes/returns char and takes care of bytes conversions internally.
 
 It uses the EEPORM to store a pointer so that it will always write in the next available slot in the memory
 
 
 ## Functions
 
-* ```myflash.flashErase();```
+* ```void myflash.flashErase();```
 Erases the flash memory and resets the pointer in the EEPORM to 0,0
+Note: for a 128MBit flash, this process takes ~ 30 seconds
 
-* ```myflash.writeToFlash(String);```
-Writes a string to the flash memory starting at the next avaialble slot (byte);
+* ```bool myflash.writeToFlash(char);```
+Writes a char to the flash memory starting at the next avaialble slot (byte) and returns true if write was successful
 
-* ```myflash.readFromFlash();```
-Reads all the content of the flash and return it in the form of a string
+* ```char readFromFlash(int pageAddr, int byteAddr);```
+Reads a char from a specifc page address and byte address on the flash and returns it
+
+* ```char readFromFlash(int byteAbsAddr);```
+Reads a char from a specifc absolute address on the flash and returns it
+
+* ```int dataSizeInFlash();```
+Returns the size of data written on the flash memory. This basically uses the stored EEPROM address pointers.
 
 
 ## Compatibility
