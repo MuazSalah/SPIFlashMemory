@@ -8,7 +8,7 @@ https://www.instructables.com/How-to-Design-with-Discrete-SPI-Flash-Memory/
 
 (Tutorial PDF is added on the repository for reference)
 
-I have modified the code so that I can send a simple string and readback a simple string, hiding all the ascii encoding and hexa world
+I have modified the code so that I can send a simple character and readback a simple character, hiding all the ascii encoding and hexa world
 
 
 ## Description
