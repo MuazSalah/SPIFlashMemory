@@ -63,8 +63,8 @@
 //#define FLASH_ADDRESS_POINTER_PAGE 11 //Address 11 and 12 will be used as we need an int for the page number (for a 128MBit Flash, there are 4096 pages)
 
 //The weirdo constructo
-#ifndef Morse_h
-#define Morse_h
+#ifndef SPIFlash
+#define SPIFlash
 
 
 
@@ -77,8 +77,10 @@ class SPIFlash
 {
 	public:
 		SPIFlash();
-		void writeToFlash(String data_string);
-		String readFromFlash();
+		bool writeToFlash(char chr);
+		char readFromFlash(int pageAddr, int byteAddr);
+		char readFromFlash(int byteAbsAddr);
+		int dataSizeInFlash();
 		void flashErase();
 	private:
 		void print_page_bytes(byte *page_buffer);

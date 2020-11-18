@@ -14,6 +14,7 @@ SPIFlash	KEYWORD1
 
 writeToFlash	KEYWORD2
 readFromFlash	KEYWORD2
+dataSizeInFlash	KEYWORD2
 flashErase	KEYWORD2
 
 

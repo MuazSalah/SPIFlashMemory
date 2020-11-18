@@ -19,11 +19,11 @@ void setup() {
   Serial.println("Done");
 
   Serial.print("Writing to the Flash... ");
-  myflash.writeToFlash("Hello World! This is a string stored on the flash");
+  myflash.writeToFlash('a');
   Serial.println("Done");
 
   Serial.print("Reading from the Flash... ");
-  Serial.println(myflash.readFromFlash());
+  Serial.println(myflash.readFromFlash(0));
   Serial.println("Done");
   
 

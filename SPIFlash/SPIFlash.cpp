@@ -68,8 +68,16 @@
 #define WB_JEDEC_ID           0x9f
 
 
+#define PAGE_SIZE 256 //Flash memory page size
+#define FLASH_MEMORY_SIZE 128 //MBit
+#define FLASH_MEMORY_LAST_PAGE_ADDRESS (FLASH_MEMORY_SIZE/8)/PAGE_SIZE
+
+
+
 #define FLASH_ADDRESS_POINTER_BYTE 10 //A single address byte is required, because byte address range is 0-255
 #define FLASH_ADDRESS_POINTER_PAGE 11 //Address 11 and 12 will be used as we need an int for the page number (for a 128MBit Flash, there are 4096 pages)
+
+
 
 
 
@@ -297,18 +305,8 @@ int SPIFlash::readIntFromEEPROM(int address)
 
 
 //Write a string to the flash, the code is utilising the existing code but instead of accepting bytes, it will take a string and work on it one char at a time
-void SPIFlash::writeToFlash(String data_string) {
-
-  //A char array for converting the string to a set of bytes
-  char char_array[data_string.length() + 1];
-
-  //Stor the string in the char array
-  data_string.toCharArray(char_array, data_string.length() + 1);
-
-  //Flash Memory variables
-  word pageno;
-  byte offset;
-  byte data;
+//Note: Don't try to change these to String, Strings do get messy when they are elongated
+bool SPIFlash::writeToFlash(char chr) {
 
   //Flash memory pointers, those pointers are stored on the EEPROM such that we always write on an unallocated space byte
   int flash_page_pointer;
@@ -317,82 +315,99 @@ void SPIFlash::writeToFlash(String data_string) {
   flash_byte_pointer = EEPROM.read(FLASH_ADDRESS_POINTER_BYTE);
   flash_page_pointer = readIntFromEEPROM(FLASH_ADDRESS_POINTER_PAGE);
 
-
-
-  for (int i = 0; i < data_string.length(); i++)
+  if (
+    (flash_page_pointer <= FLASH_MEMORY_LAST_PAGE_ADDRESS)
+    &&
+    (flash_byte_pointer < PAGE_SIZE)
+  )
   {
+
+    //Flash Memory variables
+    word pageno;
+    byte offset;
+    byte data;
 
     pageno = (word)flash_page_pointer;
     offset = (byte)flash_byte_pointer;
-    data = (byte)((int)char_array[i]);
+    data = (byte)((int)chr);
 
     write_byte(pageno, offset, data);
 
 
 
     //update the pointers
-    if (flash_byte_pointer == 255) {
+    if (flash_byte_pointer == (PAGE_SIZE-1)) {
       flash_page_pointer ++;
       flash_byte_pointer = 0;
+      writeIntIntoEEPROM(FLASH_ADDRESS_POINTER_PAGE, flash_page_pointer);
     } else {
       flash_byte_pointer ++;
     }
+    EEPROM.update(FLASH_ADDRESS_POINTER_BYTE, flash_byte_pointer);
+    
+
+    return true;
 
   }
-
-
-
-
-  EEPROM.update(FLASH_ADDRESS_POINTER_BYTE, flash_byte_pointer);
-  writeIntIntoEEPROM(FLASH_ADDRESS_POINTER_PAGE, flash_page_pointer);
+  else {
+    return false;
+  }
 
 
 }
 
 
 
-//Read the string back from the flash
-String SPIFlash::readFromFlash() {
-
-  String tmp_str;
-
-  int total_stored;
-  int flash_page_pointer;
-  int flash_byte_pointer;
-
-  flash_byte_pointer = EEPROM.read(FLASH_ADDRESS_POINTER_BYTE);
-  flash_page_pointer = readIntFromEEPROM(FLASH_ADDRESS_POINTER_PAGE);
 
 
-  total_stored = flash_byte_pointer + (flash_page_pointer * 255);
 
-  /*Serial.print("Size of data stored: ");
-  Serial.println(total_stored);
 
-  Serial.println("Stored data: ");*/
 
-  byte data_buffer;
+//Read a char back from the flash
+char SPIFlash::readFromFlash(int pageAddr, int byteAddr) {
+
   char buf[10];
   int temp;
-  char str_buffer[10];
-  byte page_buffer[256];
+  byte page_buffer[PAGE_SIZE];
 
-  for (int i = 0; i <= flash_page_pointer; i++) {
-    for (int j = 0; j < flash_byte_pointer; j++) {
-      _read_page(i, page_buffer);
-      sprintf(buf, "%03d", page_buffer[i * 16 + j]);
-      temp = atoi(buf);
-      tmp_str = tmp_str + (char)temp;
-      
-    }
-  }
 
-  /*Serial.println(tmp_str);
 
-  Serial.println("All data read");*/
+  _read_page(pageAddr, page_buffer);
 
-  return tmp_str;
+  sprintf(buf, "%03d", page_buffer[byteAddr]);
 
+  temp = atoi(buf);
+
+  return (char)temp;
+
+}
+
+
+char SPIFlash::readFromFlash(int byteAbsAddr) {
+
+  char buf[10];
+  int temp;
+  byte page_buffer[PAGE_SIZE];
+
+
+  int pageAddr = byteAbsAddr / PAGE_SIZE;
+  int byteAddr = (byteAbsAddr % PAGE_SIZE);
+
+  _read_page(pageAddr, page_buffer);
+
+  sprintf(buf, "%03d", page_buffer[byteAddr]);
+
+  temp = atoi(buf);
+
+  return (char)temp;
+
+
+
+}
+
+
+int SPIFlash::dataSizeInFlash() {
+  return EEPROM.read(FLASH_ADDRESS_POINTER_BYTE) + (readIntFromEEPROM(FLASH_ADDRESS_POINTER_PAGE) * PAGE_SIZE);
 }
 
 
