@@ -69,7 +69,7 @@
 
 
 #define PAGE_SIZE 256 //Flash memory page size
-#define FLASH_MEMORY_SIZE 128 //MBit
+#define FLASH_MEMORY_SIZE 128000000 //Bit (128000000 = 128MBit such as Winbond W25Q128JV )
 #define FLASH_MEMORY_LAST_PAGE_ADDRESS (FLASH_MEMORY_SIZE/8)/PAGE_SIZE
 
 
@@ -311,6 +311,8 @@ bool SPIFlash::writeToFlash(char chr) {
   //Flash memory pointers, those pointers are stored on the EEPROM such that we always write on an unallocated space byte
   int flash_page_pointer;
   int flash_byte_pointer;
+  
+  
 
   flash_byte_pointer = EEPROM.read(FLASH_ADDRESS_POINTER_BYTE);
   flash_page_pointer = readIntFromEEPROM(FLASH_ADDRESS_POINTER_PAGE);
@@ -406,7 +408,7 @@ char SPIFlash::readFromFlash(int byteAbsAddr) {
 }
 
 
-int SPIFlash::dataSizeInFlash() {
+int SPIFlash::dataSize() {
   return EEPROM.read(FLASH_ADDRESS_POINTER_BYTE) + (readIntFromEEPROM(FLASH_ADDRESS_POINTER_PAGE) * PAGE_SIZE);
 }
 

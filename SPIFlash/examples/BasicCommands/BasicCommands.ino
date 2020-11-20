@@ -22,10 +22,14 @@ void setup() {
   myflash.writeToFlash('a');
   Serial.println("Done");
 
-  Serial.print("Reading from the Flash... ");
+  Serial.print("Reading from the Flash char[0]... ");
   Serial.println(myflash.readFromFlash(0));
   Serial.println("Done");
-  
+
+
+  Serial.print("Reading data size... ");
+  Serial.println(myflash.dataSize());
+  Serial.println("Done");
 
 }
 

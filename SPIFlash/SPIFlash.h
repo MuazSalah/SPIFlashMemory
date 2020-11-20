@@ -80,7 +80,7 @@ class SPIFlash
 		bool writeToFlash(char chr);
 		char readFromFlash(int pageAddr, int byteAddr);
 		char readFromFlash(int byteAbsAddr);
-		int dataSizeInFlash();
+		int dataSize();
 		void flashErase();
 	private:
 		void print_page_bytes(byte *page_buffer);
