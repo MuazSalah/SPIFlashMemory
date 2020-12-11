@@ -408,8 +408,8 @@ char SPIFlash::readFromFlash(int byteAbsAddr) {
 }
 
 
-int SPIFlash::dataSize() {
-  return EEPROM.read(FLASH_ADDRESS_POINTER_BYTE) + (readIntFromEEPROM(FLASH_ADDRESS_POINTER_PAGE) * PAGE_SIZE);
+unsigned long SPIFlash::dataSize() {
+  return EEPROM.read(FLASH_ADDRESS_POINTER_BYTE) + (readIntFromEEPROM(FLASH_ADDRESS_POINTER_PAGE) * 1L * PAGE_SIZE); //the * 1L is required for unsigned long calculation
 }
 
 
