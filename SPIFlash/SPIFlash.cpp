@@ -385,7 +385,7 @@ char SPIFlash::readFromFlash(int pageAddr, int byteAddr) {
 }
 
 
-char SPIFlash::readFromFlash(int byteAbsAddr) {
+char SPIFlash::readFromFlash(unsigned long byteAbsAddr) {
 
   char buf[10];
   int temp;
