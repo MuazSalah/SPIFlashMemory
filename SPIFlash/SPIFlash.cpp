@@ -36,13 +36,20 @@
 
   Copyright 2020, Moath Salah
 
-  Redistribution of of Peter's code with a more Arduino-user-friendly interface functions.
+  Redistribution of Peter's code with a more Arduino-user-friendly interface functions.
   GNU GPL V3
 
   Rev 1 - 10/Nov/2020
   
 
-    
+
+  Rev 2 - 30/01/2021
+  + Improved the reading speed by using maximum SPI frequency
+  + Modified the char read function name from "readFromFlash" to "readCharFromFlash"
+  + Added a function to read From-To address, much faster when reading multiple pages of memory 
+  + Added a helper function "_read_page_chars" which is modded from "_read_page" to ease the work on the function "readFromFlash" so that char conversion is direct using the "char()" function rather than sprintf'ing
+  + Updated the example code with the new functions usage 
+  
 */
 
 
@@ -53,6 +60,7 @@
 
 
 #include <SPI.h>
+//For Uno:
 // SS:   pin 10
 // MOSI: pin 11
 // MISO: pin 12
@@ -87,8 +95,7 @@ SPIFlash::SPIFlash()
 {
 	//Yay!! We have got constructed! Let us dress up (SPI Initialization for the rest of the functions)
 	SPI.begin();
-	SPI.setDataMode(0);
-	SPI.setBitOrder(MSBFIRST);
+	SPI.beginTransaction(SPISettings(20000000, MSBFIRST, SPI_MODE0));
 }
 
 
@@ -240,6 +247,27 @@ void SPIFlash::_read_page(word page_number, byte *page_buffer) {
 }
 
 /*
+   See the timing diagram in section 9.2.10 of the
+   data sheet, "Read Data (03h)".
+*/
+void SPIFlash::_read_page_chars(word page_number, char *page_buffer) {
+  digitalWrite(SS, HIGH);
+  digitalWrite(SS, LOW);
+  SPI.transfer(WB_READ_DATA);
+  // Construct the 24-bit address from the 16-bit page
+  // number and 0x00, since we will read 256 bytes (one
+  // page).
+  SPI.transfer((page_number >> 8) & 0xFF);
+  SPI.transfer((page_number >> 0) & 0xFF);
+  SPI.transfer(0);
+  for (int i = 0; i < 256; ++i) {
+    page_buffer[i] = char(SPI.transfer(0));
+  }
+  digitalWrite(SS, HIGH);
+  not_busy();
+}
+
+/*
    See the timing diagram in section 9.2.21 of the
    data sheet, "Page Program (02h)".
 */
@@ -366,46 +394,102 @@ bool SPIFlash::writeToFlash(char chr) {
 
 
 //Read a char back from the flash
-char SPIFlash::readFromFlash(int pageAddr, int byteAddr) {
+char SPIFlash::readCharFromFlash(int pageAddr, int byteAddr) {
 
-  char buf[10];
-  int temp;
-  byte page_buffer[PAGE_SIZE];
+  char page_buffer[PAGE_SIZE];
 
+  _read_page_chars(pageAddr, page_buffer);
 
-
-  _read_page(pageAddr, page_buffer);
-
-  sprintf(buf, "%03d", page_buffer[byteAddr]);
-
-  temp = atoi(buf);
-
-  return (char)temp;
+  return page_buffer[byteAddr];
 
 }
 
 
-char SPIFlash::readFromFlash(unsigned long byteAbsAddr) {
-
-  char buf[10];
-  int temp;
-  byte page_buffer[PAGE_SIZE];
-
+char SPIFlash::readCharFromFlash(unsigned long byteAbsAddr) {
+	
+  char page_buffer[PAGE_SIZE];
 
   int pageAddr = byteAbsAddr / PAGE_SIZE;
   int byteAddr = (byteAbsAddr % PAGE_SIZE);
 
-  _read_page(pageAddr, page_buffer);
+  _read_page_chars(pageAddr, page_buffer);
 
-  sprintf(buf, "%03d", page_buffer[byteAddr]);
-
-  temp = atoi(buf);
-
-  return (char)temp;
-
-
+  return page_buffer[byteAddr];
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Read a char back from the flash
+void SPIFlash::readFromFlash(unsigned long fromByteAddr, unsigned long toByteAddr, char *char_buffer) {
+
+	char page_buffer[PAGE_SIZE];
+
+
+	if (toByteAddr >= fromByteAddr) { //Validate the request
+		int fromPageAddr = fromByteAddr / PAGE_SIZE;
+		int fromByteAddr_relative = (fromByteAddr % PAGE_SIZE);
+		int toPageAddr = toByteAddr / PAGE_SIZE;
+		int toByteAddr_relative = (toByteAddr % PAGE_SIZE);
+		
+		
+		if (fromPageAddr == toPageAddr) { //If the reading range is within the same page
+			_read_page_chars(fromPageAddr, page_buffer);
+			unsigned long j=0;
+			for (int i=fromByteAddr_relative; i<=toByteAddr_relative; i++) {
+				char_buffer[j] = page_buffer[i];
+				j++;
+			}
+		} else {
+			unsigned long j=0;
+			for (int p=fromPageAddr; p<=toPageAddr; p++) {
+				_read_page_chars(p, page_buffer);
+				if (p==fromPageAddr) { //We are on the first page
+					for (int i=fromByteAddr_relative; i<PAGE_SIZE; i++) {
+						char_buffer[j] = page_buffer[i];
+						j++;
+					}
+					
+				} else if (p==toPageAddr) { //We are on the last page
+					for (int i=0; i<=toByteAddr_relative; i++) {
+						char_buffer[j] = page_buffer[i];
+						j++;
+					}
+				} else { //We are in a middle page
+					for (int i=0; i<PAGE_SIZE; i++) {
+						char_buffer[j] = page_buffer[i];
+						j++;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 unsigned long SPIFlash::dataSize() {

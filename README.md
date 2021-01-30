@@ -28,11 +28,14 @@ Note: for a 128MBit flash, this process takes ~ 30 seconds
 * ```bool myflash.writeToFlash(char);```
 Writes a char to the flash memory starting at the next avaialble slot (byte) and returns true if write was successful
 
-* ```char readFromFlash(int pageAddr, int byteAddr);```
+* ```char readCharFromFlash(int pageAddr, int byteAddr);```
 Reads a char from a specifc page address and byte address on the flash and returns it
 
-* ```char readFromFlash(int byteAbsAddr);```
+* ```char readCharFromFlash(int byteAbsAddr);```
 Reads a char from a specifc absolute address on the flash and returns it
+
+* ```void readFromFlash(unsigned long fromByteAddr, unsigned long toByteAddr, char *char_buffer);```
+Reads a char array from an absolute byte address on the flash and stores in a user defined char* (preferablly with a size of 255 as in the example code)
 
 * ```int dataSizeInFlash();```
 Returns the size of data written on the flash memory. This basically uses the stored EEPROM address pointers.

@@ -36,19 +36,26 @@
 
   Copyright 2020, Moath Salah
 
-  Redistribution of of Peter's code with a more Arduino-user-friendly interface functions.
+  Redistribution of Peter's code with a more Arduino user-friendly interface functions.
   GNU GPL V3
 
   Rev 1 - 10/Nov/2020
   
 
+
+  Rev 2 - 30/01/2021
+  + Improved the reading speed by using maximum SPI frequency
+  + Modified the char read function name from "readFromFlash" to "readCharFromFlash"
+  + Added a function to read From-To address, much faster when reading multiple pages of memory 
+  + Added a helper function "_read_page_chars" which is modded from "_read_page" to ease the work on the function "readFromFlash" so that char conversion is direct using the "char()" function rather than sprintf'ing
+  + Updated the example code with the new functions usage 
     
 */
 
 
 
 //HW Allocataion for this library
-
+//For Uno:
 // SS:   pin 10
 // MOSI: pin 11
 // MISO: pin 12
@@ -78,8 +85,9 @@ class SPIFlash
 	public:
 		SPIFlash();
 		bool writeToFlash(char chr);
-		char readFromFlash(int pageAddr, int byteAddr);
-		char readFromFlash(unsigned long byteAbsAddr);
+		char readCharFromFlash(int pageAddr, int byteAddr);
+		char readCharFromFlash(unsigned long byteAbsAddr);
+		void readFromFlash(unsigned long fromByteAddr, unsigned long toByteAddr, char *char_buffer);
 		unsigned long dataSize();
 		void flashErase();
 	private:
@@ -92,6 +100,7 @@ class SPIFlash
 		void _get_jedec_id(byte *b1, byte *b2, byte *b3);
 		void _chip_erase();
 		void _read_page(word page_number, byte *page_buffer);
+		void _read_page_chars(word page_number, char *page_buffer);
 		void _write_page(word page_number, byte *page_buffer);
 		void serialEvent();
 		void writeIntIntoEEPROM(int address, int number);

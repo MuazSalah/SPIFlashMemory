@@ -14,22 +14,56 @@ void setup() {
 
   
   //This command takes quite some time, especially for large flash memories, give it some time;
-  Serial.print("Erasing the chip... ");
-  myflash.flashErase();
-  Serial.println("Done");
+  //It is disabled by default to avoid erasing your data, uncomment it to test
+  //Serial.print("Erasing the chip... ");
+  //myflash.flashErase();
+  //Serial.println("Done");
 
   Serial.print("Writing to the Flash... ");
   myflash.writeToFlash('a');
   Serial.println("Done");
 
   Serial.print("Reading from the Flash char[0]... ");
-  Serial.println(myflash.readFromFlash(0));
+  Serial.println(myflash.readCharFromFlash(0));
   Serial.println("Done");
 
 
   Serial.print("Reading data size... ");
   Serial.println(myflash.dataSize());
   Serial.println("Done");
+  
+  
+  
+  Serial.print("Reading a range of char from multiple pages ... ");
+  unsigned long lastCharAddr = myflash.dataSize() - 1;
+
+  Serial.print("Last char address: ");
+  Serial.println(lastCharAddr);
+  
+  Serial.println("Flash data: ");
+  
+  unsigned long toAddr = 0;
+  int buffSize = 255;
+  char read_buffer[buffSize];
+
+  for (unsigned long i = 0; i <= lastCharAddr;) {
+    if (i + buffSize < lastCharAddr) {
+      toAddr = i + buffSize;
+    } else {
+      toAddr = lastCharAddr;
+    }
+    memset(read_buffer, 0, 255);
+    myflash.readFromFlash(i, toAddr, read_buffer);
+    Serial.print(read_buffer);
+    i = i + buffSize + 1;
+  }
+  Serial.println("");
+  Serial.println("Done");
+  
+  
+  
+  
+  
 
 }
 

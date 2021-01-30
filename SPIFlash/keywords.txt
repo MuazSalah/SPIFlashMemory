@@ -13,6 +13,7 @@ SPIFlash	KEYWORD1
 #######################################
 
 writeToFlash	KEYWORD2
+readCharFromFlash	KEYWORD2
 readFromFlash	KEYWORD2
 dataSize	KEYWORD2
 flashErase	KEYWORD2
