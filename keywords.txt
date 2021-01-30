@@ -1,0 +1,24 @@
+#######################################
+# Syntax Coloring Map 
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+SPIFlash	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+writeToFlash	KEYWORD2
+readCharFromFlash	KEYWORD2
+readFromFlash	KEYWORD2
+dataSize	KEYWORD2
+flashErase	KEYWORD2
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
