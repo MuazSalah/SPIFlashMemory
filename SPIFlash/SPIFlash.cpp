@@ -50,6 +50,12 @@
   + Added a helper function "_read_page_chars" which is modded from "_read_page" to ease the work on the function "readFromFlash" so that char conversion is direct using the "char()" function rather than sprintf'ing
   + Updated the example code with the new functions usage 
   
+  
+  
+  Rev 3 - 12/02/2021
+  + Bug Fix: The provided example code was printing the buffer in a single shot, leading to printing unknown char at the end
+  + Minor improvement to the library by removing unnecessary extra index variable
+  
 */
 
 
@@ -443,15 +449,13 @@ void SPIFlash::readFromFlash(unsigned long fromByteAddr, unsigned long toByteAdd
 		int toPageAddr = toByteAddr / PAGE_SIZE;
 		int toByteAddr_relative = (toByteAddr % PAGE_SIZE);
 		
-		
 		if (fromPageAddr == toPageAddr) { //If the reading range is within the same page
 			_read_page_chars(fromPageAddr, page_buffer);
-			unsigned long j=0;
 			for (int i=fromByteAddr_relative; i<=toByteAddr_relative; i++) {
-				char_buffer[j] = page_buffer[i];
-				j++;
+				char_buffer[i] = page_buffer[i];
 			}
 		} else {
+			Serial.println("different page read");
 			unsigned long j=0;
 			for (int p=fromPageAddr; p<=toPageAddr; p++) {
 				_read_page_chars(p, page_buffer);
@@ -460,7 +464,6 @@ void SPIFlash::readFromFlash(unsigned long fromByteAddr, unsigned long toByteAdd
 						char_buffer[j] = page_buffer[i];
 						j++;
 					}
-					
 				} else if (p==toPageAddr) { //We are on the last page
 					for (int i=0; i<=toByteAddr_relative; i++) {
 						char_buffer[j] = page_buffer[i];

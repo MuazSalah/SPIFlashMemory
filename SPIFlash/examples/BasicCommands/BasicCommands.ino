@@ -19,13 +19,13 @@ void setup() {
   //myflash.flashErase();
   //Serial.println("Done");
 
-  Serial.print("Writing to the Flash... ");
-  myflash.writeToFlash('a');
-  Serial.println("Done");
+  //Serial.print("Writing to the Flash... ");
+  //myflash.writeToFlash('a');
+  //Serial.println("Done");
 
-  Serial.print("Reading from the Flash char[0]... ");
-  Serial.println(myflash.readCharFromFlash(0));
-  Serial.println("Done");
+  //Serial.print("Reading from the Flash char[0]... ");
+  //Serial.println(myflash.readCharFromFlash(0));
+  //Serial.println("Done");
 
 
   Serial.print("Reading data size... ");
@@ -43,19 +43,25 @@ void setup() {
   Serial.println("Flash data: ");
   
   unsigned long toAddr = 0;
-  int buffSize = 255;
+  int buffSize = 256;
   char read_buffer[buffSize];
 
   for (unsigned long i = 0; i <= lastCharAddr;) {
+    
     if (i + buffSize < lastCharAddr) {
-      toAddr = i + buffSize;
+      toAddr = i + buffSize-1;
     } else {
       toAddr = lastCharAddr;
     }
-    memset(read_buffer, 0, 255);
+
+    
+    memset(read_buffer, 0, buffSize);
     myflash.readFromFlash(i, toAddr, read_buffer);
-    Serial.print(read_buffer);
-    i = i + buffSize + 1;
+    for (int j=0; j<buffSize; j++) {
+      Serial.print(read_buffer[j]);
+    }
+    
+    i = i + buffSize;
   }
   Serial.println("");
   Serial.println("Done");
